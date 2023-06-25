@@ -1,4 +1,4 @@
-module github.com/TutorialEdge/realtime-chat-go-react
+module github.com/Kassaking7/GoChatServer
 
 go 1.20
 

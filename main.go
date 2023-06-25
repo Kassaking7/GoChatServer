@@ -5,7 +5,7 @@ import (
     "fmt"
     "net/http"
 
-    "github.com/TutorialEdge/realtime-chat-go-react/pkg/websocket"
+    "github.com/Kassaking7/GoChatServer/pkg/websocket"
 
 )
 
