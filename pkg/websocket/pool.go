@@ -1,19 +1,27 @@
 package websocket
-import "fmt"
+import (
+    "fmt"
+    "context"
+    "go.mongodb.org/mongo-driver/bson"
+    "go.mongodb.org/mongo-driver/mongo"
+)
 
 type Pool struct {
     Register   chan *Client
     Unregister chan *Client
     Clients    map[*Client]bool
     Broadcast  chan Message
+    ChatCollection *mongo.Collection
 }
 
-func NewPool() *Pool {
+
+func NewPool(chatCollection *mongo.Collection) *Pool {
     return &Pool{
         Register:   make(chan *Client),
         Unregister: make(chan *Client),
         Clients:    make(map[*Client]bool),
         Broadcast:  make(chan Message),
+        ChatCollection: chatCollection,
     }
 }
 
@@ -43,6 +51,26 @@ func (pool *Pool) Start() {
                     return
                 }
             }
+            err := pool.saveChatMessage(message)
+            if err != nil {
+                fmt.Println("Failed to save chat message:", err)
+            }
         }
     }
+}
+func (pool *Pool) saveChatMessage(message Message) error {
+    // 创建要保存的聊天消息对象
+    chatMessage := bson.M{
+        "sender":  message.Sender,
+        "content": message.Body,
+        // 添加其他字段，如时间戳等
+    }
+
+    // 将聊天消息保存到数据库
+    _, err := pool.ChatCollection.InsertOne(context.Background(), chatMessage)
+    if err != nil {
+        return err
+    }
+
+    return nil
 }
